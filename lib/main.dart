@@ -56,38 +56,46 @@ class Tile extends StatelessWidget {
   }
 }
 
-class GamePage extends StatelessWidget {
+class GamePage extends StatefulWidget {
   GamePage({super.key});
-  // This object is part of the game.dart file.
-  // It manages wordle logic, and is outside the scope of this tutorial.
+
+  @override
+  State<GamePage> createState() => _GamePageState();
+}
+
+class _GamePageState extends State<GamePage> {
   final Game _game = Game();
 
   @override
   Widget build(BuildContext context) {
-     return Padding(
+    return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
-          spacing: 5.0,
-          children: [
-            for (var guess in _game.guesses)
-              Row(
-                spacing: 5.0,
-                children: [
-                  for (var letter in guess)
-                      Tile(letter.char, letter.type),
-                ]
-              ),
-              GuessInput(
+        children: [
+          for (var guess in _game.guesses)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                for (var letter in guess)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2.5, vertical: 2.5),
+                    child: Tile(letter.char, letter.type),
+                  )
+              ],
+            ),
+          GuessInput(
             onSubmitGuess: (String guess) {
-              // TODO, handle guess
-              print(guess); // Temporary
-            }
+              setState(() { // NEW
+                _game.guess(guess);
+              });
+            },
           ),
-          ],
-        ),
+        ],
+      ),
     );
   }
 }
+
 
 class GuessInput extends StatelessWidget {
   GuessInput({super.key, required this.onSubmitGuess});
@@ -98,6 +106,12 @@ class GuessInput extends StatelessWidget {
 
   final FocusNode _focusNode = FocusNode();
 
+  void _onSubmit() {
+    onSubmitGuess(_textEditingController.text);
+    _textEditingController.clear();
+    _focusNode.requestFocus();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -107,32 +121,40 @@ class GuessInput extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               maxLength: 5,
-              decoration: const InputDecoration(
+              focusNode: _focusNode,
+              autofocus: true,
+              decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(35)),
                 ),
               ),
               controller: _textEditingController,
-              autofocus: true,
-              focusNode: _focusNode,
-              onSubmitted: (String input) {
-                onSubmitGuess(_textEditingController.text.trim());
-                _textEditingController.clear();
-                _focusNode.requestFocus();
-              }
+              onSubmitted: (String value) {
+                _onSubmit();
+              },
             ),
           ),
         ),
         IconButton(
           padding: EdgeInsets.zero,
           icon: Icon(Icons.arrow_circle_up),
-           onPressed: () {
-            onSubmitGuess(_textEditingController.text.trim());
-            _textEditingController.clear();
-            _focusNode.requestFocus();
-          },
+          onPressed: _onSubmit,
         ),
       ],
     );
+  }
+}
+
+class ExampleWidget extends StatefulWidget {
+  ExampleWidget({super.key});
+
+  @override
+  State<ExampleWidget> createState() => _ExampleWidgetState();
+}
+
+class _ExampleWidgetState extends State<ExampleWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
   }
 }
